@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /** The Hunger Games - Shut the gate
  *  5 kyu */
-public class HungerGames2 {
+public class Dinglemouse_2 {
 	
 	public static void main(String[] args) {
 		System.out.println(shutTheGate("|..HH....\\AAAA\\CC..|AAA/VVV/RRRR|CCC"));
@@ -56,19 +56,34 @@ public class HungerGames2 {
 		
 		// Feeding frenzy
 		domains.forEach(d -> {
-			EnumSet<Farm>
-				contentsDomain = EnumSet.noneOf(Farm.class),
-				eatenInDomain = EnumSet.noneOf(Farm.class);
-			d.stream()
-				.map(pen -> pen.getContents())
-				.forEach(c -> contentsDomain.addAll(c));
-			contentsDomain.stream()
-				.flatMap(c -> Arrays.stream(c.eats))
-				.forEach(e -> eatenInDomain.add(e));
-//				.forEach(e -> d.stream().forEach(pen -> pen.consume(e)));
+			EnumSet<Farm> eatenInDomain = d.stream()
+				.map(Pen::getContents)
+				.flatMap(Set::stream)
+				.flatMap(farmElem -> Arrays.stream(farmElem.eats))
+				.collect(Collectors.toCollection(() -> EnumSet.noneOf(Farm.class)));
+			if(!eatenInDomain.isEmpty()) d.stream()
+				.forEach(pen -> 
+						eatenInDomain.stream().forEach(edible -> pen.consume(edible)));
 		});
 		
-		return farm1.replace(Farm.EVERYTHINGELSE.legend, ".");
+		// Animal run
+		EnumSet<Farm> escapesFromDomain0 = domains.get(0).stream()
+				.map(Pen::getContents)
+				.flatMap(Set::stream)
+				.filter(farmElem -> farmElem.runsaway)
+				.collect(Collectors.toCollection(() -> EnumSet.noneOf(Farm.class)));
+		if(!escapesFromDomain0.isEmpty()) domains.get(0).stream()
+				.forEach(pen -> 
+						escapesFromDomain0.stream().forEach(runner -> pen.consume(runner)));
+		
+		StringBuilder farm2 = new StringBuilder(farm1.length());
+		for(i = 0; i < N1; i++) {
+			farm2.append(pens[i].getString());
+			farm2.append(gates[i].getString());
+		}
+		farm2.append(pens[N1].getString());
+		
+		return farm2.toString().replace(Farm.EVERYTHINGELSE.legend, ".");
 	}
 	
 	public enum Farm {
@@ -94,16 +109,12 @@ public class HungerGames2 {
 			this.legend = legend;
 		}
 		
-		public boolean isName(String string) {
-			return string.equals(name);
-		}
-		
 	}
 	
 	public static class Pen {
 		
-		public String string;
-		public EnumSet<Farm> contents;
+		private String string;
+		private EnumSet<Farm> contents;
 		
 		public Pen(String string) {
 			this.string = string;
@@ -116,22 +127,32 @@ public class HungerGames2 {
 			return contents;
 		}
 		
-		public void consume(Farm edible) {
-			string.replace(edible.legend, Farm.EVERYTHINGELSE.legend);
-			contents.remove(edible);
-			contents.add(Farm.EVERYTHINGELSE);
+		public String getString() {
+			return string;
+		}
+		
+		public void consume(Farm removable) {
+			if(removable != null) {
+				string = string.replace(removable.legend, Farm.EVERYTHINGELSE.legend);
+				contents.remove(removable);
+				contents.add(Farm.EVERYTHINGELSE);
+			}
 		}
 		
 	}
 	
 	public static class Gate {
 		
-		public String string;
-		public boolean closed;
+		private String string;
+		private boolean closed;
 		
 		public Gate(String string) {
 			this.string = string;
 			closed = string.equals(Farm.GATECLOSED.legend);
+		}
+		
+		public String getString() {
+			return string;
 		}
 		
 		public boolean isClosed() {

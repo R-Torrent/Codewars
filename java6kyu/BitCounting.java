@@ -14,10 +14,10 @@ public class BitCounting {
 	
 	public static int countBits(int n) {
 		int res = 0;
-		while(n > 0) {
+		do {
 			res += n%2;
-			n /= 2;
-		}
+		} while((n /= 2) > 0);
+		
 		return res;
 	}
 	

@@ -1,5 +1,7 @@
 package java8kyu;
 
+/** Fake Binary
+ *  8 kyu */
 public class FakeBinary {
 	
 	public static void main(String args[]) {
